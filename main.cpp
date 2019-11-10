@@ -11,22 +11,25 @@ std::atomic<int> files_downloaded;
 void download_loop() {
     int thread_id = thread_ids.fetch_add(1);
     std::cout << "Download thread " << thread_id << " started" << std::endl;
-    const Aws::String bucket_name = "BUCKET_NAME";
-    const Aws::String object_name = "OBJECT_NAME";
+    const Aws::String bucket_name = "kellens-alpha-test";
+    const Aws::String object_name = "random-tensors/0.ndarray";
     const char * filename = "/dev/null";
     std::ofstream output_file(filename, std::ios::binary);
-    Aws::S3::S3Client s3_client;
+    Aws::Client::ClientConfiguration clientConfig;
+    clientConfig.region = "us-west-2";
+    Aws::S3::S3Client s3_client(clientConfig);
     Aws::S3::Model::GetObjectRequest object_request;
     object_request.SetBucket(bucket_name);
     object_request.SetKey(object_name);
     for(int i =0; i < DOWNLOAD_ITERATIONS; i++) {
+        std::cout << "THREAD: " << thread_id << " downloading new file" << std::endl;
         auto get_object_outcome = s3_client.GetObject(object_request);
         if (get_object_outcome.IsSuccess())
         {
-            std::cout << "THREAD: " << thread_id << " downloading new file" << std::endl;
             auto &retrieved_file = get_object_outcome.GetResultWithOwnership().GetBody();
             output_file << retrieved_file.rdbuf();
             files_downloaded.fetch_add(1);
+            std::cout << "THREAD: " << thread_id << " download finished" << std::endl;
         }
         else
         {
