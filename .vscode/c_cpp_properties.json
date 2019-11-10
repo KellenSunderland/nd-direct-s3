@@ -1,0 +1,21 @@
+{
+    "configurations": [
+        {
+            "name": "Linux",
+            "includePath": [
+                "/workspaces/nd-direct-s3/aws-sdk-cpp/aws-cpp-sdk-core/include",
+                "/workspaces/nd-direct-s3/aws-sdk-cpp/aws-cpp-sdk-s3/include",
+                "/workspaces/nd-direct-s3/aws-sdk-cpp/aws-cpp-sdk-core",
+                "/workspaces/nd-direct-s3/aws-sdk-cpp/aws-cpp-sdk-s3",
+                "/usr/local/include",
+                "/user/local"
+            ],
+            "defines": [],
+            "compilerPath": "/usr/bin/gcc",
+            "cStandard": "c11",
+            "cppStandard": "c++17",
+            "intelliSenseMode": "clang-x64"
+        }
+    ],
+    "version": 4
+}
