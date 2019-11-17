@@ -32,7 +32,7 @@ void download_loop() {
       files_downloaded.fetch_add(1);
       std::cout << "THREAD: " << thread_id << " download finished" << std::endl;
     } else {
-      auto error = get_object_outcome.GetError();
+      const auto &error = get_object_outcome.GetError();
       std::cout << "THREAD: " << thread_id
                 << " ERROR: " << error.GetExceptionName() << ": "
                 << error.GetMessage() << std::endl;
@@ -46,8 +46,9 @@ int main(int argc, char **argv) {
   Aws::InitAPI(options);
   {
     std::vector<std::thread> download_threads;
+    download_threads.reserve(NUM_THREADS);
     for (int i = 0; i < NUM_THREADS; i++) {
-      download_threads.push_back(std::thread(download_loop));
+      download_threads.emplace_back(std::thread(download_loop));
     }
 
     std::for_each(download_threads.begin(), download_threads.end(),
