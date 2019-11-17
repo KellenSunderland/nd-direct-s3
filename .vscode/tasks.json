@@ -1,0 +1,24 @@
+{
+    "version": "2.0.0",
+    "tasks": [
+        {
+            "label": "Debug Build",
+            "type": "shell",
+            "command": "cmake -DCMAKE_BUILD_TYPE=DEBUG ${workspaceFolder}/  ${workspaceFolder}/build && cd ${workspaceFolder}/build && make -j $(nproc)"
+        },
+        {
+            "type": "shell",
+            "label": "g++ build active file",
+            "command": "/usr/bin/g++",
+            "args": [
+                "-g",
+                "${file}",
+                "-o",
+                "${fileDirname}/${fileBasenameNoExtension}"
+            ],
+            "options": {
+                "cwd": "/usr/bin"
+            }
+        }
+    ]
+}
