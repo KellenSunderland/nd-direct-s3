@@ -16,8 +16,8 @@ RUN apt-get update \
     && apt-get -y install git procps lsb-release \
     #
     # Install C++ tools
-    && apt-get -y install build-essential zlib1g-dev cmake cppcheck valgrind libcurl4-openssl-dev \
-       libssl-dev openssl libcurl4-openssl-dev uuid-dev libpulse-dev python3 python3-pip \
+    && apt-get -y install build-essential zlib1g-dev cmake cppcheck valgrind libcurl4-openssl-dev python3 python3-pip \
+       libssl-dev openssl libcurl4-openssl-dev uuid-dev libpulse-dev clang-7 clang-tidy-7 clang-format-7 \
     && pip3 install awscli \
     # Create a non-root user to use if preferred - see https://aka.ms/vscode-remote/containers/non-root-user.
     && groupadd --gid $USER_GID $USERNAME \
@@ -44,3 +44,5 @@ RUN cmake -DCMAKE_BUILD_TYPE=Debug -DBUILD_ONLY="s3" .. && \
 ENV DEBIAN_FRONTEND=
 ENV LD_LIBRARY_PATH /usr/local/lib
 ENV LIBRARY_PATH /usr/local/lib
+ENV CC /usr/bin/clang-7
+ENV CXX /usr/bin/clang++-7
