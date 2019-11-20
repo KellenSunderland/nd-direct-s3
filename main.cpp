@@ -11,8 +11,8 @@ std::atomic<int> files_downloaded;
 void download_loop() {
   int thread_id = thread_ids.fetch_add(1);
   std::cout << "Download thread " << thread_id << " started" << std::endl;
-  const Aws::String bucket_name = "kellens-alpha-test";
-  const Aws::String object_name = "random-tensors/0.ndarray";
+  const Aws::String bucket_name = "random-nd-array-bucket";
+  const Aws::String object_name = "rand.ndarray";
   const char *filename = "/dev/null";
   std::ofstream output_file(filename, std::ios::binary);
   Aws::Client::ClientConfiguration clientConfig;
