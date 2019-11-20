@@ -23,6 +23,7 @@
     // "postCreateCommand": "gcc -v",
 
     "extensions": [
-        "ms-vscode.cpptools"
+        "ms-vscode.cpptools",
+        "ms-azuretools.vscode-docker"
     ]
 }
