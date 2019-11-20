@@ -45,5 +45,14 @@ RUN cmake -DCMAKE_BUILD_TYPE=Debug -DBUILD_ONLY="s3" .. && \
     make -j $(nproc) && \
     make install
 
+# Install MXNet
+WORKDIR /opt/deps/
+RUN git clone --recurse https://github.com/apache/incubator-mxnet.git -b v1.5.x
+WORKDIR /opt/deps/incubator-mxnet/build
+RUN cmake -DCMAKE_BUILD_TYPE=Debug -DUSE_CUDA=0 -DUSE_CUDNN=0 -DUSE_OPENCV=0 \
+          -DUSE_JEMALLOC=0 -DUSE_LAPACK=0 -DBUILD_CPP_EXAMPLES=0 .. && \
+    make -j $(nproc) && \
+    make install
+
 # Switch back to dialog for any ad-hoc use of apt-get
 ENV DEBIAN_FRONTEND=
