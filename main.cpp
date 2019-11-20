@@ -1,6 +1,11 @@
 #include <aws/core/Aws.h>
 #include <aws/s3/S3Client.h>
 #include <aws/s3/model/GetObjectRequest.h>
+
+#define MSHADOW_USE_CUDA 0
+#define MSHADOW_USE_MKL 0
+#include <mxnet/ndarray.h>
+
 #include <fstream>
 
 const int NUM_THREADS = 16;
@@ -13,22 +18,24 @@ void download_loop() {
   std::cout << "Download thread " << thread_id << " started" << std::endl;
   const Aws::String bucket_name = "random-nd-array-bucket";
   const Aws::String object_name = "rand.ndarray";
-  const char *filename = "/dev/null";
-  std::ofstream output_file(filename, std::ios::binary);
   Aws::Client::ClientConfiguration clientConfig;
   clientConfig.region = "us-west-2";
   Aws::S3::S3Client s3_client(clientConfig);
-  Aws::S3::Model::GetObjectRequest object_request;
-  object_request.SetBucket(bucket_name);
-  object_request.SetKey(object_name);
   for (int i = 0; i < DOWNLOAD_ITERATIONS; i++) {
+    Aws::S3::Model::GetObjectRequest object_request;
+    object_request.SetBucket(bucket_name);
+    object_request.SetKey(object_name);
     std::cout << "THREAD: " << thread_id << " downloading new file"
               << std::endl;
     auto get_object_outcome = s3_client.GetObject(object_request);
     if (get_object_outcome.IsSuccess()) {
       auto &retrieved_file =
           get_object_outcome.GetResultWithOwnership().GetBody();
-      output_file << retrieved_file.rdbuf();
+      std::vector<char> output_ndarray_bytes;
+      output_ndarray_bytes.reserve(163840080);
+      retrieved_file.read(output_ndarray_bytes.data(), 163840080);
+      // Todo: load from stream using mxnet::NDArray::Load();
+      // Reference: https://github.com/dmlc/dmlc-core/blob/master/src/io/s3_filesys.cc
       files_downloaded.fetch_add(1);
       std::cout << "THREAD: " << thread_id << " download finished" << std::endl;
     } else {
