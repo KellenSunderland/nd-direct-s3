@@ -17,7 +17,7 @@ RUN apt-get update \
     #
     # Install C++ tools
     && apt-get -y install build-essential zlib1g-dev cmake cppcheck valgrind libcurl4-openssl-dev python3 python3-pip \
-       libssl-dev openssl libcurl4-openssl-dev uuid-dev libpulse-dev clang-7 clang-tidy-7 clang-format-7 \
+       libssl-dev openssl libcurl4-openssl-dev uuid-dev libpulse-dev clang-7 clang-tidy-7 clang-format-7 libopenblas-dev \
     && pip3 install awscli \
     # Create a non-root user to use if preferred - see https://aka.ms/vscode-remote/containers/non-root-user.
     && groupadd --gid $USER_GID $USERNAME \
@@ -32,6 +32,11 @@ RUN apt-get update \
     && apt-get clean -y \
     && rm -rf /var/lib/apt/lists/*
 
+ENV LD_LIBRARY_PATH /usr/local/lib
+ENV LIBRARY_PATH /usr/local/lib
+ENV CC /usr/bin/clang-7
+ENV CXX /usr/bin/clang++-7
+
 # Install AWS SDK
 WORKDIR /opt/deps/
 RUN git clone --recurse https://github.com/aws/aws-sdk-cpp.git
@@ -42,7 +47,3 @@ RUN cmake -DCMAKE_BUILD_TYPE=Debug -DBUILD_ONLY="s3" .. && \
 
 # Switch back to dialog for any ad-hoc use of apt-get
 ENV DEBIAN_FRONTEND=
-ENV LD_LIBRARY_PATH /usr/local/lib
-ENV LIBRARY_PATH /usr/local/lib
-ENV CC /usr/bin/clang-7
-ENV CXX /usr/bin/clang++-7
