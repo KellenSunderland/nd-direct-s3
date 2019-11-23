@@ -1,14 +1,14 @@
 #include <aws/core/Aws.h>
 #include <aws/s3/S3Client.h>
 #include <aws/s3/model/GetObjectRequest.h>
+#include <mxnet-cpp/MxNetCpp.h>
 
 #define MSHADOW_USE_CUDA 0
 #define MSHADOW_USE_MKL 0
 #include <mxnet/ndarray.h>
-
 #include <fstream>
 
-const int NUM_THREADS = 16;
+const int NUM_THREADS = 1;
 const int DOWNLOAD_ITERATIONS = 10;
 std::atomic<int> thread_ids;
 std::atomic<int> files_downloaded;
@@ -34,7 +34,11 @@ void download_loop() {
       std::vector<char> output_ndarray_bytes;
       output_ndarray_bytes.reserve(163840080);
       retrieved_file.read(output_ndarray_bytes.data(), 163840080);
-      // Todo: load from stream using mxnet::NDArray::Load();
+      auto context = mxnet::cpp::Context::cpu();
+      auto shape = mxnet::cpp::Shape(4);
+      // shape[0] = 16;
+      // mxnet::cpp::NDArray(static_cast<float*>(output_ndarray_bytes.data()), shape, 163840080);
+      // // Todo: load from stream using mxnet::NDArray::Load();
       // Reference: https://github.com/dmlc/dmlc-core/blob/master/src/io/s3_filesys.cc
       files_downloaded.fetch_add(1);
       std::cout << "THREAD: " << thread_id << " download finished" << std::endl;

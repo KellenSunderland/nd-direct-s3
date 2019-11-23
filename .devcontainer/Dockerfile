@@ -32,8 +32,8 @@ RUN apt-get update \
     && apt-get clean -y \
     && rm -rf /var/lib/apt/lists/*
 
-ENV LD_LIBRARY_PATH /usr/local/lib
-ENV LIBRARY_PATH /usr/local/lib
+ENV LD_LIBRARY_PATH /usr/local/lib:/opt/deps/incubator-mxnet/build/mklml/mklml_lnx_2019.0.5.20190502/lib/
+ENV LIBRARY_PATH /usr/local/lib:/opt/deps/incubator-mxnet/build/mklml/mklml_lnx_2019.0.5.20190502/lib/
 ENV CC /usr/bin/clang-7
 ENV CXX /usr/bin/clang++-7
 
@@ -50,7 +50,7 @@ WORKDIR /opt/deps/
 RUN git clone --recurse https://github.com/apache/incubator-mxnet.git -b v1.5.x
 WORKDIR /opt/deps/incubator-mxnet/build
 RUN cmake -DCMAKE_BUILD_TYPE=Debug -DUSE_CUDA=0 -DUSE_CUDNN=0 -DUSE_OPENCV=0 \
-          -DUSE_JEMALLOC=0 -DUSE_LAPACK=0 -DBUILD_CPP_EXAMPLES=0 .. && \
+          -DUSE_JEMALLOC=0 -DUSE_LAPACK=0 -DBUILD_CPP_EXAMPLES=0 -DUSE_CPP_PACKAGE=1 .. && \
     make -j $(nproc) && \
     make install
 
