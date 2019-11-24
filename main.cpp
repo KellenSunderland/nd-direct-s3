@@ -8,8 +8,8 @@
 #include <mxnet/ndarray.h>
 #include <fstream>
 
-const int NUM_THREADS = 1;
-const int DOWNLOAD_ITERATIONS = 10;
+const int NUM_THREADS = 20;
+const int DOWNLOAD_ITERATIONS = 1000;
 std::atomic<int> thread_ids;
 std::atomic<int> files_downloaded;
 
@@ -25,27 +25,31 @@ void download_loop() {
     Aws::S3::Model::GetObjectRequest object_request;
     object_request.SetBucket(bucket_name);
     object_request.SetKey(object_name);
-    std::cout << "THREAD: " << thread_id << " downloading new file"
-              << std::endl;
+    std::cout << "THREAD: " << thread_id << " downloading new file" << std::endl;
     auto get_object_outcome = s3_client.GetObject(object_request);
     if (get_object_outcome.IsSuccess()) {
-      auto &retrieved_file =
-          get_object_outcome.GetResultWithOwnership().GetBody();
+      int file_size = get_object_outcome.GetResult().GetContentLength();
+      auto &retrieved_file = get_object_outcome.GetResultWithOwnership().GetBody();
       std::vector<char> output_ndarray_bytes;
-      output_ndarray_bytes.reserve(163840080);
-      retrieved_file.read(output_ndarray_bytes.data(), 163840080);
-      auto context = mxnet::cpp::Context::cpu();
-      auto shape = mxnet::cpp::Shape(4);
-      // shape[0] = 16;
-      // mxnet::cpp::NDArray(static_cast<float*>(output_ndarray_bytes.data()), shape, 163840080);
-      // // Todo: load from stream using mxnet::NDArray::Load();
-      // Reference: https://github.com/dmlc/dmlc-core/blob/master/src/io/s3_filesys.cc
+      output_ndarray_bytes.reserve(file_size);
+      retrieved_file.read(output_ndarray_bytes.data(), file_size);
+      auto data_arrays =
+          mxnet::cpp::NDArray::LoadFromBufferToList(output_ndarray_bytes.data(), file_size);
+
+      std::cout << "Downloaded " << data_arrays.size() << " arrays" << std::endl;
+      for (auto data_array : data_arrays) {
+        std::cout << "Array shape is: ";
+        for (auto i : data_array.GetShape()) {
+          std::cout << " " << i;
+        }
+        std::cout << std::endl;
+      }
+
       files_downloaded.fetch_add(1);
       std::cout << "THREAD: " << thread_id << " download finished" << std::endl;
     } else {
       const auto &error = get_object_outcome.GetError();
-      std::cout << "THREAD: " << thread_id
-                << " ERROR: " << error.GetExceptionName() << ": "
+      std::cout << "THREAD: " << thread_id << " ERROR: " << error.GetExceptionName() << ": "
                 << error.GetMessage() << std::endl;
     }
   }
@@ -62,8 +66,7 @@ int main(int argc, char **argv) {
       download_threads.emplace_back(std::thread(download_loop));
     }
 
-    std::for_each(download_threads.begin(), download_threads.end(),
-                  [](auto &t) { t.join(); });
+    std::for_each(download_threads.begin(), download_threads.end(), [](auto &t) { t.join(); });
     std::cout << "Total downloaded files: " << files_downloaded << std::endl;
   }
   Aws::ShutdownAPI(options);
