@@ -32,11 +32,20 @@ bool Tensorizer::has_preloaded_tensor() {
   return m_ndarray_output_queue.size() > 0;
 }
 
-NDArrayHandle* Tensorizer::get_next_ndarray() {
-  std::lock_guard<std::mutex> lock(m_mutex);
-  NDArrayHandle* handle = m_ndarray_output_queue.front();
-  m_ndarray_output_queue.pop();
-  return handle;
+NDArrayHandle Tensorizer::get_next_ndarray() {
+  while(m_ndarray_output_queue.size() == 0) {
+    std::this_thread::sleep_for(std::chrono::milliseconds(50));
+  }
+  {
+    std::lock_guard<std::mutex> lock(m_mutex);
+    if (m_ndarray_output_queue.size() > 0) {
+      NDArrayHandle handle = m_ndarray_output_queue.front();
+      m_ndarray_output_queue.pop();
+      std::cout << "Returning downloaded array" << std::endl;
+      return handle;
+    }
+  }
+  return get_next_ndarray();
 }
 
 void Tensorizer::download_loop() {
@@ -44,7 +53,10 @@ void Tensorizer::download_loop() {
   std::cout << "Download thread " << thread_id << " started" << std::endl;
 
   while (is_running) {
-    std::this_thread::sleep_for(std::chrono::seconds(5));
+    while (m_s3_input_queue.size() == 0 || m_ndarray_output_queue.size() > 100) {
+      std::this_thread::sleep_for(std::chrono::seconds(1));
+    }
+
     // TODO: Signal to wake up
     Aws::Client::ClientConfiguration clientConfig;
     clientConfig.region = "us-west-2";
@@ -70,6 +82,7 @@ void Tensorizer::download_loop() {
     if (get_object_outcome.IsSuccess()) {
       int file_size = get_object_outcome.GetResult().GetContentLength();
       auto& retrieved_file = get_object_outcome.GetResultWithOwnership().GetBody();
+      // TODO: move this to the heap and transfer ownership out of code block.
       std::vector<char> output_ndarray_bytes;
       output_ndarray_bytes.reserve(file_size);
       retrieved_file.read(output_ndarray_bytes.data(), file_size);
@@ -83,6 +96,8 @@ void Tensorizer::download_loop() {
           std::cout << " " << i;
         }
         std::cout << std::endl;
+        std::lock_guard<std::mutex> lock(m_mutex);
+        m_ndarray_output_queue.push(data_array.GetHandle());
       }
 
       std::cout << "THREAD: " << thread_id << " download finished" << std::endl;

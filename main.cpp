@@ -12,13 +12,18 @@ int main(int argc, char **argv) {
 
   Tensorizer nd_array_fetcher;
 
-  for (int i = 0; i < 100; i++) {
-    const Aws::String bucket_name = "random-nd-array-bucket";
-    const Aws::String object_name = "rand.ndarray";
+  for (int i = 0; i < 10000; i++) {
+    const Aws::String bucket_name = "nd-array-test-2";
+    std::string object_name("random-tensors/" + std::to_string(i) + ".ndarray");
     nd_array_fetcher.push_s3_object(bucket_name.c_str(), object_name.c_str());
   }
 
-  std::this_thread::sleep_for(std::chrono::seconds(300));
+   for (int i = 0; i < 10000; i++) {
+    NDArrayHandle handle = nd_array_fetcher.get_next_ndarray();
+    std::cout << "Finished downloading tensor # " << i << std::endl;
+    // Todo: cleanup handle here once ownership clearer.
+    // delete handle;
+  }
 
   Aws::ShutdownAPI(options);
 }
