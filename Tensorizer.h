@@ -22,7 +22,7 @@ class Tensorizer {
  private:
   void download_loop();
 
-  std::atomic<int> m_thread_ids;
+  std::atomic<int> m_thread_ids {};
   std::vector<std::thread> m_download_threads;
   std::queue<std::pair<std::string, std::string>> m_s3_input_queue;
   std::queue<NDArrayHandle> m_ndarray_output_queue;
