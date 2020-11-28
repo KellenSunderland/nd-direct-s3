@@ -21,7 +21,7 @@ class Tensorizer {
   Tensorizer();
   ~Tensorizer();
 
-  // This call queues and S3 object for download when there's an availible thread. Once downloaded
+  // This call queues an S3 object for download when there's an availible thread. Once downloaded
   // the tensor can be retured with get_next_ndarray. Arrays will be returned in the same order they
   // are enqueued.
   void queue_ndarray(const char* s3_bucket, const char* s3_object);
