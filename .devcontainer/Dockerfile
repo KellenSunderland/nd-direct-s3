@@ -54,5 +54,20 @@ RUN cmake -DCMAKE_BUILD_TYPE=Debug -DUSE_CUDA=0 -DUSE_CUDNN=0 -DUSE_OPENCV=0 \
     make -j $(nproc) && \
     make install
 
+# Install python3
+RUN apt-get update
+RUN apt-get install -y wget && rm -rf /var/lib/apt/lists/*
+RUN wget \
+    https://repo.anaconda.com/miniconda/Miniconda3-latest-Linux-x86_64.sh \
+    && mkdir /root/.conda \
+    && bash Miniconda3-latest-Linux-x86_64.sh -b \
+    && rm -f Miniconda3-latest-Linux-x86_64.sh
+
+# Setup path such that miniconda is the default python interpreter.
+ENV PATH="/root/miniconda3/bin:${PATH}"
+ARG PATH="/root/miniconda3/bin:${PATH}"
+
+RUN pip install ipython boto3 numpy
+
 # Switch back to dialog for any ad-hoc use of apt-get
 ENV DEBIAN_FRONTEND=
