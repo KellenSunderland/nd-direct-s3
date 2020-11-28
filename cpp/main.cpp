@@ -13,9 +13,9 @@ int main(int argc, char **argv) {
   Tensorizer nd_array_fetcher;
 
   for (int i = 0; i < 10000; i++) {
-    const Aws::String bucket_name = "nd-array-test-2";
+    const Aws::String bucket_name = "nd-array-test-3";
     std::string object_name("random-tensors/" + std::to_string(i) + ".ndarray");
-    nd_array_fetcher.push_s3_object(bucket_name.c_str(), object_name.c_str());
+    nd_array_fetcher.queue_ndarray(bucket_name.c_str(), object_name.c_str());
   }
 
   for (int i = 0; i < 10000; i++) {

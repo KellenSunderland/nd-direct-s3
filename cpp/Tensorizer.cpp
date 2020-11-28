@@ -20,7 +20,7 @@ Tensorizer::~Tensorizer() {
   }
 }
 
-void Tensorizer::push_s3_object(const char* s3_bucket, const char* s3_object) {
+void Tensorizer::queue_ndarray(const char* s3_bucket, const char* s3_object) {
   {
     std::lock_guard<std::mutex> lock(m_mutex);
     m_s3_input_queue.push(std::pair(s3_bucket, s3_object));
@@ -67,8 +67,7 @@ void Tensorizer::download_loop() {
       if (m_s3_input_queue.size() > 0) {
         s3_object_location = m_s3_input_queue.front();
         m_s3_input_queue.pop();
-        std::cout << "Downloading new file - " << s3_object_location.first
-                  << s3_object_location.second << std::endl;
+        std::cout << "Downloading new file - " << s3_object_location.first << s3_object_location.second <<std::endl;
       } else {
         std::cout << "no items in queue, waiting" << std::endl;
         continue;
