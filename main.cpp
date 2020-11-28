@@ -18,7 +18,7 @@ int main(int argc, char **argv) {
     nd_array_fetcher.push_s3_object(bucket_name.c_str(), object_name.c_str());
   }
 
-   for (int i = 0; i < 10000; i++) {
+  for (int i = 0; i < 10000; i++) {
     NDArrayHandle handle = nd_array_fetcher.get_next_ndarray();
     std::cout << "Finished downloading tensor # " << i << std::endl;
     // Todo: cleanup handle here once ownership clearer.

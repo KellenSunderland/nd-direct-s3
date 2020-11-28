@@ -33,7 +33,7 @@ bool Tensorizer::has_preloaded_tensor() {
 }
 
 NDArrayHandle Tensorizer::get_next_ndarray() {
-  while(m_ndarray_output_queue.size() == 0) {
+  while (m_ndarray_output_queue.size() == 0) {
     std::this_thread::sleep_for(std::chrono::milliseconds(50));
   }
   {
