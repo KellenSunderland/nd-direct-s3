@@ -4,6 +4,10 @@ tensorizer_handle_t tensorizer_construct() {
     return new mx::contrib::Tensorizer();
 }
 
+void tensorizer_destruct(tensorizer_handle_t handle) {
+    delete handle;
+}
+
 void queue_ndarray(tensorizer_handle_t handle, const char* s3_bucket, const char* s3_object) {
     handle->queue_ndarray(s3_bucket, s3_object);
 }

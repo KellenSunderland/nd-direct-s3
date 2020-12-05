@@ -13,6 +13,9 @@ extern "C" {
   // Create a Tensorizer instance.
   tensorizer_handle_t tensorizer_construct();
 
+  // Cleanup a Tensorizer instance.
+  void tensorizer_destruct(tensorizer_handle_t handle);
+
   // This call queues an S3 object for download when there's an availible thread. Once downloaded
   // the tensor can be retured with get_next_ndarray. Arrays will be returned in the same order they
   // are enqueued.
