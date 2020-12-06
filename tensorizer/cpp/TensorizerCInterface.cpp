@@ -1,10 +1,10 @@
 #include "TensorizerCInterface.h"
 
-tensorizer_handle_t tensorizer_construct() {
+tensorizer_handle_t construct() {
     return new mx::contrib::Tensorizer();
 }
 
-void tensorizer_destruct(tensorizer_handle_t handle) {
+void destruct(tensorizer_handle_t handle) {
     delete handle;
 }
 
