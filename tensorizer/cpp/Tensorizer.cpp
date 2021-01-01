@@ -67,7 +67,8 @@ void Tensorizer::download_loop() {
       if (m_s3_input_queue.size() > 0) {
         s3_object_location = m_s3_input_queue.front();
         m_s3_input_queue.pop();
-        std::cout << "Downloading new file - " << s3_object_location.first << s3_object_location.second <<std::endl;
+        std::cout << "Downloading new file - " << s3_object_location.first
+                  << s3_object_location.second << std::endl;
       } else {
         std::cout << "no items in queue, waiting" << std::endl;
         continue;
