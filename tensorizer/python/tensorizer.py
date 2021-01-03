@@ -3,12 +3,19 @@ import logging
 
 from functools import lru_cache
 
-logging.basicConfig(level=logging.DEBUG)
+class Tensorizer:
 
-@lru_cache(maxsize=None)
-def _load_native_tensorizer():
-    logging.info("Loading Tensorizer native lib")
-    return ctypes.cdll.LoadLibrary("libtensorizer.so")
+    def __init__(self):
+        self.tensorizer = self._load_native_tensorizer()
+        self.tensorizer_handle = self.tensorizer.construct()
 
-tensorizer = _load_native_tensorizer()
-tensorizer_handle = tensorizer.construct()
+
+    @lru_cache(maxsize=None)
+    def _load_native_tensorizer(self):
+        logging.info("Loading Tensorizer native lib")
+        return ctypes.cdll.LoadLibrary("libtensorizer.so")
+
+
+    def queue_ndarray(self, s3_bucket, s3_object):
+        self.tensorizer.queue_ndarray(self.tensorizer_handle, s3_bucket, s3_object)
+

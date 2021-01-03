@@ -21,6 +21,7 @@ Tensorizer::~Tensorizer() {
 }
 
 void Tensorizer::queue_ndarray(const char* s3_bucket, const char* s3_object) {
+  std::cout << "Queueing array s3://" << s3_bucket << "/" << s3_object << std::endl;
   {
     std::lock_guard<std::mutex> lock(m_mutex);
     m_s3_input_queue.push(std::pair(s3_bucket, s3_object));
@@ -67,8 +68,8 @@ void Tensorizer::download_loop() {
       if (m_s3_input_queue.size() > 0) {
         s3_object_location = m_s3_input_queue.front();
         m_s3_input_queue.pop();
-        std::cout << "Downloading new file - " << s3_object_location.first
-                  << s3_object_location.second << std::endl;
+        std::cout << "Downloading new file - s3://" << s3_object_location.first
+                  << "/" << s3_object_location.second << std::endl;
       } else {
         std::cout << "no items in queue, waiting" << std::endl;
         continue;
@@ -81,12 +82,15 @@ void Tensorizer::download_loop() {
     std::cout << "THREAD: " << thread_id << " downloading new file" << std::endl;
     auto get_object_outcome = s3_client.GetObject(object_request);
     if (get_object_outcome.IsSuccess()) {
+      std::cout << "THREAD: " << thread_id << " get object request in flight" << std::endl;
       int file_size = get_object_outcome.GetResult().GetContentLength();
+      std::cout << "THREAD: " << thread_id << " file size is: " << std::to_string(file_size) << std::endl;
       auto& retrieved_file = get_object_outcome.GetResultWithOwnership().GetBody();
       // TODO: move this to the heap and transfer ownership out of code block.
       std::vector<char> output_ndarray_bytes;
       output_ndarray_bytes.reserve(file_size);
       retrieved_file.read(output_ndarray_bytes.data(), file_size);
+      std::cout << "THREAD: " << thread_id << " loading buffer via MXNet" << std::endl;
       auto data_arrays =
           mxnet::cpp::NDArray::LoadFromBufferToList(output_ndarray_bytes.data(), file_size);
 

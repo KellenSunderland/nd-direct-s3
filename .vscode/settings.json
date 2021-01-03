@@ -59,7 +59,8 @@
         "cinttypes": "cpp",
         "typeinfo": "cpp",
         "bitset": "cpp",
-        "regex": "cpp"
+        "regex": "cpp",
+        "typeindex": "cpp"
     },
     "python.linting.pylintEnabled": false,
     "python.linting.flake8Enabled": true,
